@@ -177,14 +177,6 @@ volumes:
 - name: varlibdockercontainers
   hostPath:
     path: /var/lib/docker/containers
-- name: etcfluentd-main
-  configMap:
-    name: fluentd-main
-    defaultMode: 0777
-- name: etcfluentd-config
-  configMap:
-    name: fluentd-config
-    defaultMode: 0777
 
 volumeMounts:
 - name: varlog
@@ -192,10 +184,6 @@ volumeMounts:
 - name: varlibdockercontainers
   mountPath: /var/lib/docker/containers
   readOnly: true
-- name: etcfluentd-main
-  mountPath: /etc/fluent
-- name: etcfluentd-config
-  mountPath: /etc/fluent/config.d/
 
 ## Only available if kind is StatefulSet
 ## Fluentd persistence
@@ -289,7 +277,9 @@ plugins: []
 ## Add fluentd config files from K8s configMaps
 ##
 configMapConfigs:
-  - fluentd-prometheus-conf
+  - prometheus-conf
+  
+
 # - fluentd-systemd-conf
 
 ## Fluentd configurations:

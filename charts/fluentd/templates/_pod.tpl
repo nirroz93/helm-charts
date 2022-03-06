@@ -58,22 +58,34 @@ containers:
       {{- toYaml .Values.resources | nindent 8 }}
     volumeMounts:
       {{- toYaml .Values.volumeMounts | nindent 6 }}
-      {{- range $key := .Values.configMapConfigs }}
-      {{- print "- name: fluentd-custom-cm-" $key  | nindent 6 }}
-        {{- print "mountPath: /etc/fluent/" $key ".d"  | nindent 8 }}
-      {{- end }}
-      {{- if .Values.persistence.enabled }}
+      {{ range $key := .Values.configMapConfigs }}
+      - name: fluentd-custom-cm-{{ $key }}
+        mountPath: /etc/fluent/{{ $key }}.d
+      {{ end }}
+      - name: main
+        mountPath: /etc/fluent/
+      - name: config
+        mountPath: /etc/fluent/config.d/
+      {{ if .Values.persistence.enabled }}
       - mountPath: /var/log/fluent
         name: {{ include "fluentd.fullname" . }}-buffer
       {{- end }}
 volumes:
   {{- toYaml .Values.volumes | nindent 2 }}
   {{- range $key := .Values.configMapConfigs }}
-  {{- print "- name: fluentd-custom-cm-" $key  | nindent 2 }}
+  - name: fluentd-custom-cm-{{ $key }}
     configMap:
-      {{- print "name: " .  | nindent 6 }}
+      name: {{ include "fluentd.fullname" $ }}-{{ . }}
       defaultMode: 0777
   {{- end }}
+  - name: main
+    configMap:
+      name: {{ include "fluentd.fullname" $ }}-main
+      defaultMode: 0777
+  - name: config
+    configMap:
+      name: {{ include "fluentd.fullname" $ }}-config
+      defaultMode: 0777
 {{- with .Values.nodeSelector }}
 nodeSelector:
   {{- toYaml . | nindent 2 }}
